@@ -6,7 +6,7 @@ const prisma = new PrismaClient({ log: ["query"] });
 const datas = datajson.element_data.elements;
 
 async function main() {
-  for (let i = 126; i < datas.length; i++) {
+  for (let i = 0; i < datas.length; i++) {
     try {
       await prisma.craft.create({
         data: {
