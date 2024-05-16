@@ -6,17 +6,17 @@ const prisma = new PrismaClient({ log: ["query"] });
 const datas = datajson.element_data.elements;
 
 async function main() {
-  for (let i = 0; i < datas.length; i++) {
+  for (const element of datas) {
     try {
       await prisma.craft.create({
         data: {
-          discovered: datas[i].discovered,
-          libelle: datas[i].text,
-          emoji: datas[i].emoji,
+          discovered: element.discovered,
+          libelle: element.text,
+          emoji: element.emoji,
         },
       });
     } catch (error) {
-      console.log(`${datas[i].text} - ${datas[i].emoji}`);
+      console.log(`${element.text} - ${element.emoji}`);
     }
   }
 }
