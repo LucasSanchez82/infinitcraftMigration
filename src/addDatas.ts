@@ -20,5 +20,5 @@ async function main() {
     }
   }
 }
-
+await main()
 export default main;

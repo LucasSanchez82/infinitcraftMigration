@@ -5,3 +5,5 @@ async function main() {
     await addDatas();
     await addRecettes();
 }
+
+await main();

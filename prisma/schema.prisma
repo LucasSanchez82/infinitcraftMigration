@@ -8,28 +8,30 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-model craft {
+model Craft {
   id                                Int       @id(map: "pk_craft") @default(autoincrement())
   libelle String @unique
   emoji String
   discovered Boolean
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
-  recette_recette_id_enfant1Tocraft recette[] @relation("recette_id_enfant1Tocraft")
-  recette_recette_id_enfant2Tocraft recette[] @relation("recette_id_enfant2Tocraft")
-  recette_recette_id_parentTocraft  recette[] @relation("recette_id_parentTocraft")
+  recette_recette_id_enfant1Tocraft Recette[] @relation("recette_id_enfant1Tocraft")
+  recette_recette_id_enfant2Tocraft Recette[] @relation("recette_id_enfant2Tocraft")
+  recette_recette_id_parentTocraft  Recette[] @relation("recette_id_parentTocraft")
+	@@map("craft")
 }
 
-model recette {
+model Recette {
   id_enfant1                      Int
   id_enfant2                      Int
   id_parent                       Int
-  craft_recette_id_enfant1Tocraft craft @relation("recette_id_enfant1Tocraft", fields: [id_enfant1], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft")
-  craft_recette_id_enfant2Tocraft craft @relation("recette_id_enfant2Tocraft", fields: [id_enfant2], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft1")
-  craft_recette_id_parentTocraft  craft @relation("recette_id_parentTocraft", fields: [id_parent], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft2")
+  craft_recette_id_enfant1Tocraft Craft @relation("recette_id_enfant1Tocraft", fields: [id_enfant1], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft")
+  craft_recette_id_enfant2Tocraft Craft @relation("recette_id_enfant2Tocraft", fields: [id_enfant2], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft1")
+  craft_recette_id_parentTocraft  Craft @relation("recette_id_parentTocraft", fields: [id_parent], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_recette_craft2")
   
   @@id([id_enfant1, id_enfant2, id_parent])
   @@index([id_enfant1], map: "i_fk_recette_craft")
   @@index([id_enfant2], map: "i_fk_recette_craft1")
   @@index([id_parent], map: "i_fk_recette_craft2")
   @@unique([id_enfant1, id_enfant2, id_parent], map: "uq_recette")
+	@@map("recette")
 }

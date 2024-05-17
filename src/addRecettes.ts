@@ -1,17 +1,43 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Craft } from "@prisma/client";
+import type { Data } from "./types";
 import data from "./data.json";
 import { craftSchema } from "./zod/craftSchema";
-type Data = typeof data;
-type Elements = Data["recettes"];
-type ElementsKeys = keyof Elements;
-type Craft = Elements[ElementsKeys];
+import type { z } from "zod";
 
 const prisma = new PrismaClient({ log: ["query"] });
-const elements = data.recettes;
+const elements = (data as Data).recettes;
+
+const addRecetteToDb = async (
+  craft: z.infer<typeof craftSchema>,
+  parent: Craft
+) => {
+  const [recipe1, recipe2] = await prisma.$transaction([
+    prisma.craft.findUnique({
+      where: {
+        libelle: craft.recipe1.text,
+      },
+    }),
+
+    prisma.craft.findUnique({
+      where: {
+        libelle: craft.recipe2.text,
+      },
+    }),
+  ]);
+  if (recipe1 && recipe2) {
+    await prisma.recette.create({
+      data: {
+        id_enfant1: recipe1.id,
+        id_enfant2: recipe2.id,
+        id_parent: parent.id,
+      },
+    });
+  }
+};
 
 async function main() {
   for (const craftKey in elements) {
-    const crafts = elements[craftKey as ElementsKeys];
+    const crafts = elements[craftKey];
 
     const parent = await prisma.craft.findUnique({
       where: {
@@ -24,28 +50,10 @@ async function main() {
       for (const craft of crafts) {
         const unsafeCraft = craftSchema.safeParse(craft);
         if (unsafeCraft.success) {
-          const data = unsafeCraft.data;
-          const [recipe1, recipe2] = await prisma.$transaction([
-            prisma.craft.findUnique({
-              where: {
-                libelle: data.recipe1.text,
-              },
-            }),
-
-            prisma.craft.findUnique({
-              where: {
-                libelle: data.recipe2.text,
-              },
-            }),
-          ]);
-          if (recipe1 && recipe2) {
-            await prisma.recette.create({
-              data: {
-                id_enfant1: recipe1.id,
-                id_enfant2: recipe2.id,
-                id_parent: parent.id,
-              },
-            });
+          try {
+            await addRecetteToDb(unsafeCraft.data, parent);
+          } catch (error) {
+            console.log(error);
           }
         } else {
           console.log(unsafeCraft.error.errors);
@@ -54,5 +62,5 @@ async function main() {
     }
   }
 }
-
+await main();
 export default main;
