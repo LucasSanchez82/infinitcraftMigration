@@ -6,6 +6,13 @@ To install dependencies:
 bun install
 ```
 
+To create database:
+1. create .env and set user and password
+2.
+```bash
+bunx prisma migrate dev
+```
+
 To run:
 
 ```bash
